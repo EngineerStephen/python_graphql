@@ -9,6 +9,7 @@ db = SQLAlchemy(model_class=Base)
 class Order(Base):
     __tablename__ = 'orders'
     id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(db.String(255))
     customer: Mapped[str] = mapped_column(db.String(255))
     order: Mapped[str] = mapped_column(db.String(255))
 

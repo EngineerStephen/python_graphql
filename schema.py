@@ -10,10 +10,10 @@ class Query(graphene.ObjectType):
     orders = graphene.List(Order)
     search_orders = graphene.List(Order, name=graphene.String(), customer=graphene.String(), order_date=graphene.DateTime())
 
-    def resolve_orders(self, info):
+    def resolve_orders(self):
         return db.session.execute(db.select(OrderModel)).scalars()
     
-    def resolve_search_orders(self, info, name=None, customer=None, order_date=None):
+    def resolve_search_orders(self, name=None, customer=None, order_date=None):
         query = db.select(OrderModel)
         if name:
             query = query.where(OrderModel.name.ilike(f'%{name}%'))
@@ -33,7 +33,7 @@ class AddOrder(graphene.Mutation):
     
     order = graphene.Field(Order)
 
-    def mutate(self, info, name, customer, order_date): 
+    def mutate(self, name, customer, order_date): 
         order = OrderModel(name=name, customer=customer, order_date=order_date)
         db.session.add(order)
         db.session.commit() 
@@ -49,7 +49,7 @@ class UpdateOrder(graphene.Mutation):
         order_date = graphene.DateTime(required=False)
     order = graphene.Field(Order)
 
-    def mutate(self, info, id, name=None, customer=None, order_date=None):
+    def mutate(self, id, name=None, customer=None, order_date=None):
         order = db.session.get(OrderModel, id)
         if not order:
             return None
@@ -70,7 +70,7 @@ class DeleteOrder(graphene.Mutation):
     
     order = graphene.Field(Order)
 
-    def mutate(self, info, id):
+    def mutate(self, id):
         order = db.session.get(OrderModel, id)
         if order:
             db.session.delete(order)
