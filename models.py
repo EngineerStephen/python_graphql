@@ -7,7 +7,7 @@ class Base(DeclarativeBase): #Creating our Base model that all other models will
 db = SQLAlchemy(model_class=Base)
 
 class Order(Base):
-    __tablename__ = 'movies'
+    __tablename__ = 'orders'
     id: Mapped[int] = mapped_column(primary_key=True)
     customer: Mapped[str] = mapped_column(db.String(255))
     order: Mapped[str] = mapped_column(db.String(255))

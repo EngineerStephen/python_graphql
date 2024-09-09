@@ -12,7 +12,7 @@ schema = graphene.Schema(query=Query, mutation=Mutation)
 
 app.add_url_rule( #Registering endpoint /graphql, and using the GraphQLView to handle requests
     '/graphql',
-    view_func= GraphQLView.as_view('graphql', schema=schema, graphiql=True) #Setting our schema and toggle the use of the GraphiQl UI
+    view_func= GraphQLView.as_view('graphql', schema=schema, graphql=True) #Setting our schema and toggle the use of the GraphiQl UI
 )
 
 

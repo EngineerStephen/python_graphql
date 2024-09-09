@@ -1,87 +1,86 @@
 import graphene
 from graphene_sqlalchemy import SQLAlchemyObjectType
-from models import Bakery as BakeryModel, db
+from models import Order as OrderModel, db
 
-class Bakery(SQLAlchemyObjectType):
+class Order(SQLAlchemyObjectType):
     class Meta:
-        model = BakeryModel
+        model = OrderModel
 
 class Query(graphene.ObjectType):
-    bakeries = graphene.List(Bakery)
-    search_bakeries = graphene.List(Bakery, name=graphene.String(), customer=graphene.String(), order_date=graphene.DateTime())
+    orders = graphene.List(Order)
+    search_orders = graphene.List(Order, name=graphene.String(), customer=graphene.String(), order_date=graphene.DateTime())
 
-    def resolve_bakeries(self, info):
-        return db.session.execute(db.select(BakeryModel)).scalars()
+    def resolve_orders(self, info):
+        return db.session.execute(db.select(OrderModel)).scalars()
     
-    def resolve_search_bakeries(self, info, name=None, customer=None, order_date=None):
-        query = db.select(BakeryModel)
+    def resolve_search_orders(self, info, name=None, customer=None, order_date=None):
+        query = db.select(OrderModel)
         if name:
-            query = query.where(BakeryModel.name.ilike(f'%{name}%'))
+            query = query.where(OrderModel.name.ilike(f'%{name}%'))
         if customer:
-            query = query.where(BakeryModel.customer.ilike(f'%{customer}%'))
+            query = query.where(OrderModel.customer.ilike(f'%{customer}%'))
         if order_date:
-            query = query.where(BakeryModel.order_date == order_date)
+            query = query.where(OrderModel.order_date == order_date)
         results = db.session.execute(query).scalars().all()
         return results
 
 
-class AddBakery(graphene.Mutation): 
+class AddOrder(graphene.Mutation):
     class Arguments: 
         name = graphene.String(required=True)
         customer = graphene.String(required=True)
         order_date = graphene.DateTime(required=True)
     
-    bakery = graphene.Field(Bakery)
+    order = graphene.Field(Order)
 
     def mutate(self, info, name, customer, order_date): 
-        bakery = BakeryModel(name=name, customer=customer, order_date=order_date)
-        db.session.add(bakery)
+        order = OrderModel(name=name, customer=customer, order_date=order_date)
+        db.session.add(order)
         db.session.commit() 
 
-        db.session.refresh(bakery)
-        return AddBakery(bakery=bakery)
-    
-class UpdateBakery(graphene.Mutation):
+        db.session.refresh(order)
+        return AddOrder(order=order)
+
+class UpdateOrder(graphene.Mutation):
     class Arguments:
         id = graphene.Int(required=True)
         name = graphene.String(required=False)
         customer = graphene.String(required=False)
         order_date = graphene.DateTime(required=False)
-
-    bakery = graphene.Field(Bakery)
+    order = graphene.Field(Order)
 
     def mutate(self, info, id, name=None, customer=None, order_date=None):
-        bakery = db.session.get(BakeryModel, id)
-        if not bakery:
+        order = db.session.get(OrderModel, id)
+        if not order:
             return None
         if name:
-            bakery.name = name
+            order.name = name
         if customer:
-            bakery.customer = customer
+            order.customer = customer
         if order_date:
-            bakery.order_date = order_date
+            order.order_date = order_date
 
-        db.session.add(bakery)
+        db.session.add(order)
         db.session.commit()
-        return UpdateBakery(bakery=bakery)
+        return UpdateOrder(order=order)
     
-class DeleteBakery(graphene.Mutation):
+class DeleteOrder(graphene.Mutation):
     class Arguments:
         id = graphene.Int(required=True)
     
-    bakery = graphene.Field(Bakery)
+    order = graphene.Field(Order)
 
     def mutate(self, info, id):
-        bakery = db.session.get(BakeryModel, id)
-        if bakery:
-            db.session.delete(bakery)
+        order = db.session.get(OrderModel, id)
+        if order:
+            db.session.delete(order)
             db.session.commit()
         else:
             return None
         
-        return DeleteBakery(bakery=bakery)
+        return DeleteOrder(order=order)
 
 class Mutation(graphene.ObjectType):
-    create_bakery = AddBakery.Field()
-    update_bakery = UpdateBakery.Field()
-    delete_bakery = DeleteBakery.Field()
+    create_order = AddOrder.Field()
+    update_order = UpdateOrder.Field()
+    delete_order = DeleteOrder.Field()
